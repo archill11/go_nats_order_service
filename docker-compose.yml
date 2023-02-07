@@ -1,0 +1,25 @@
+version: "3.8"
+
+services:
+  postgresql:
+    container_name: postgresql
+    image: postgres:12-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: orders_l0
+
+  stan:
+    container_name: stanserver
+    image: nats-streaming:0.25.3
+    ports:
+      - "4222:4222"
+      - "8222:8222"
+    command:
+      - "-cid=cluster-L0" 
+      - "--debug=true"
+      # - "--store=file"
+      # - "--dir=data" #datastore
+

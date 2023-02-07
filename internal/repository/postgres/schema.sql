@@ -1,0 +1,4 @@
+CREATE TABLE IF NOT EXISTS orders (
+    uid TEXT UNIQUE NOT NULL PRIMARY KEY,
+    json_order JSONB NOT NULL
+)
