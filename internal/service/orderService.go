@@ -27,7 +27,6 @@ func (os *OrderService) GetAllOrders() ([]model.Order, error) {
 		return nil, err
 	}
 	orders := os.parseOrderToJson(data...)
-
 	return orders, nil
 }
 
@@ -54,7 +53,6 @@ func (os *OrderService) AddOrder(orderUID, jsonOrder string) error {
 // Метод парсит заказы в Json
 func (srv *OrderService) parseOrderToJson(data ...entity.OrderEntity) []model.Order {
 	orders := make([]model.Order, 0, len(data))
-
 	for _, dataOrder := range data {
 		var order model.Order
 		dataOrderUID := dataOrder.GetJsonData()

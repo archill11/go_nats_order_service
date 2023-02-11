@@ -72,7 +72,6 @@ var (
 )
 
 func (o *Order) Validate() error {
-
 	phoneNumRegex := regexp.MustCompile(`^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$`)
 
 	var errs error
@@ -88,6 +87,5 @@ func (o *Order) Validate() error {
 	if !phoneNumRegex.MatchString(o.Delivery.Phone) {
 		errs = multierror.Append(errs, ErrInvalidPhoneNumbe)
 	}
-
 	return errs
 }

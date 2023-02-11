@@ -41,24 +41,20 @@ func New(conf config.Config) (*Database, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	if err := db.Ping(); err != nil { // проверка что есть подключеие к БД
 		return nil, err
 	}
-
 	if _, err := db.Exec(InitTableQuery); err != nil { //создаем таблицу в БД
 		return nil, err
 	}
 
 	storage := &Database{
 		db:      db,
-		storeCh: make(chan entity.OrderEntity, 10_000),
+		storeCh: make(chan entity.OrderEntity, 10),
 		wg:      &sync.WaitGroup{},
 	}
-
 	storage.wg.Add(1)
 	go storage.InsertWorker()
-
 	return storage, nil
 }
 
@@ -85,7 +81,6 @@ func (s *Database) GetAll() ([]entity.OrderEntity, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	defer rows.Close()
 	for rows.Next() {
 		var order entity.OrderEntity
@@ -100,7 +95,6 @@ func (s *Database) GetAll() ([]entity.OrderEntity, error) {
 // Метод отправляет заказ в канал для созранения в БД
 func (s *Database) AddOrder(orderUID, order string) error {
 	newEntity := entity.NewOrderEntity(orderUID, order) // создаем новую сущность
-
 	s.storeCh <- newEntity // пихаем новую сущность в канал
 	return nil
 }
@@ -119,7 +113,6 @@ func (s *Database) InsertWorker() {
 			log.Printf("postgresDB: save %s order", newEntity.GetUID())
 		}
 	}
-
 	// произойдет если закрыть канал
 	log.Println("postgresDB: DB stopped")
 	s.wg.Done()

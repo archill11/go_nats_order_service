@@ -16,7 +16,6 @@ type APIServer struct {
 }
 
 func New(port string, service *service.OrderService) (*APIServer, error) {
-
 	router := mux.NewRouter()
 	server := &APIServer{
 		Server: http.Server{
@@ -29,9 +28,7 @@ func New(port string, service *service.OrderService) (*APIServer, error) {
 		service: service,
 		router:  router,
 	}
-
 	server.router.HandleFunc("/", server.getAllOrders).Methods(http.MethodGet)      // GET /
 	server.router.HandleFunc("/{uid}", server.getOrderById).Methods(http.MethodGet) // GET /uid
-
 	return server, nil
 }

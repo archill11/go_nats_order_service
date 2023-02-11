@@ -19,7 +19,6 @@ func (srv *APIServer) getAllOrders(rw http.ResponseWriter, r *http.Request) {
 		http.Error(rw, "Something went wrong...", http.StatusInternalServerError)
 		return
 	}
-
 	rw.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(rw).Encode(orders)
 }
@@ -32,7 +31,6 @@ func (srv *APIServer) getOrderById(rw http.ResponseWriter, r *http.Request) {
 		http.Error(rw, "Something went wrong...", http.StatusInternalServerError)
 		return
 	}
-
 	order, err := srv.service.GetOrderById(uid)
 	if err != nil {
 		if errors.Is(err, repository.ErrNotFound) {
@@ -42,7 +40,6 @@ func (srv *APIServer) getOrderById(rw http.ResponseWriter, r *http.Request) {
 		http.Error(rw, "Something went wrong...", http.StatusInternalServerError)
 		return
 	}
-
 	rw.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(rw).Encode(order)
 }

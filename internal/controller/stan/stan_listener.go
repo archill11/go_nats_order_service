@@ -18,25 +18,20 @@ type StanListener struct {
 }
 
 func New(conf config.Config, service *service.OrderService) (StanListener, error) {
-
 	stanConf := conf.StanListener
-
 	stanConn, err := stan.Connect(stanConf.ClusterName, stanConf.ClientId)
 	if err != nil {
 		return StanListener{}, err
 	}
-
 	sl := StanListener{
 		stanConn: stanConn,
 		service:  service,
 	}
-
 	sub, err := stanConn.Subscribe(stanConf.Subject, sl.msgHandler, stan.DurableName(stanConf.DurableName))
 	if err != nil {
 		return StanListener{}, err
 	}
 	sl.sub = sub
-
 	log.Println("STAN started")
 	return sl, nil
 }

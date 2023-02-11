@@ -31,20 +31,16 @@ func New(dbStore repository.OrderRepo) (*Cache, error) {
 	store := &Cache{
 		timedRepo: timedmap.New(time.Minute),
 	}
-
 	if err := store.FillCacheFromDB(store, dbStore); err != nil {
 		return nil, fmt.Errorf("in_memory_cache: could not apply option: %w", err)
 	}
-
 	return store, nil
 }
 
 // FillCacheFromDB Метод заполяет in-memory кэш данными из БД
 func (s *Cache) FillCacheFromDB(cacheStore *Cache, dbStore repository.OrderRepo) error {
-
 	outCh := make(chan []entity.OrderEntity, 1)
 	errsCh := make(chan error, 1)
-
 	go func() {
 		orders, err := dbStore.GetAll() // получаем все заказы из БД
 		if err != nil {
@@ -60,14 +56,18 @@ func (s *Cache) FillCacheFromDB(cacheStore *Cache, dbStore repository.OrderRepo)
 
 	select {
 	case orders := <-outCh:
-		for _, order := range orders { // добавляем все заказы в in-memory кэш
-			go cacheStore.PutInCache(order.GetUID(), order.GetJsonData())
+		sem := make(chan bool, 10) // semaphore
+		for _, o := range orders { // добавляем все заказы в in-memory кэш
+			sem <- true
+			go func(uid, json string) {
+				defer func() { <-sem }()
+				cacheStore.PutInCache(uid, json)
+			}(o.GetUID(), o.GetJsonData())
 		}
 		if len(orders) > 0 {
 			log.Printf("in_memory_cache: add %d orders from the database", len(orders))
 		}
 		return nil
-
 	case err := <-errsCh:
 		return err
 	}
@@ -79,7 +79,6 @@ func (s *Cache) AddOrder(orderUID, jsonOrder string) error {
 	if err != nil {
 		return err
 	}
-
 	if s.generalStorage != nil {
 		s.generalStorage.AddOrder(orderUID, jsonOrder)
 	}
@@ -93,7 +92,6 @@ func (s *Cache) PutInCache(orderUID, jsonOrder string) error {
 	if ok {
 		return repository.ErrAlreadyExists
 	}
-
 	s.repository.Store(orderUID, jsonOrder) // добавляем заказ в in-memory кэш
 	s.repositoryLength = 0                  // удаляем длинну in-memory кэш репозитория
 	return nil
@@ -112,7 +110,6 @@ func (s *Cache) Get(orderUID string) (entity.OrderEntity, error) {
 			s.PutInCache(orderUID, orderJsonb.(string))
 		}
 	}
-
 	order := entity.NewOrderEntity(orderUID, orderJsonb.(string))
 
 	return order, nil
@@ -128,16 +125,13 @@ func (s *Cache) GetAll() ([]entity.OrderEntity, error) {
 		cl := s.CacheLen(&s.repository) // иначе считаем и кэшируем
 		cacheLen = *cl
 	}
-
 	orders := make([]entity.OrderEntity, 0, cacheLen)
-
 	s.repository.Range(func(uid, jsonb interface{}) bool {
 		orderEntity := entity.NewOrderEntity(uid.(string), jsonb.(string))
 
 		orders = append(orders, orderEntity)
 		return true
 	})
-
 	return orders, nil
 }
 
@@ -150,7 +144,6 @@ func (s *Cache) CacheLen(sMap *sync.Map) *int {
 	})
 	// кэшируем высчитанное значение, оно будет удалено при следующей оперции добавления
 	s.repositoryLength = cacheMapLen
-
 	return &cacheMapLen
 }
 

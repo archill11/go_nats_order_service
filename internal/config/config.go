@@ -37,20 +37,17 @@ var (
 
 // InitFile Метод инициализирует значения конфигурации из файла config.yaml
 func Get() Config {
-
 	once.Do(func() {
 		file, err := os.Open("config.yaml")
 		if err != nil {
 			log.Println(err)
 		}
 		defer file.Close()
-
 		decoder := yaml.NewDecoder(file)
 		err = decoder.Decode(&config)
 		if err != nil {
 			log.Println(err)
 		}
 	})
-
 	return config
 }
