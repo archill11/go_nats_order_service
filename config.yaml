@@ -1,5 +1,6 @@
 database:
-  host: "localhost"
+  # host: "localhost"
+  host: "188.93.210.121"
   port: "5432"
   user: "postgres"
   pass: "secret"
@@ -7,6 +8,7 @@ database:
   driverName: "pgx"
 
 stan-listener:
+  # host: "188.93.210.121"
   cluster_name: "cluster-L0"
   client_id: "orderServer"
   durable_name: "orderSeverSub"

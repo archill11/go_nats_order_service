@@ -23,7 +23,7 @@ test:
 .PHONY:test
 
 run-serv:
-	go build ./cmd/orderserver/main.go && ./main.exe
+	go run ./cmd/orderserver/main.go
 .PHONY:run-serv
 
 stan-push:

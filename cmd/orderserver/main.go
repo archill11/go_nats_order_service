@@ -33,13 +33,11 @@ func main() {
 	if err != nil {
 		log.Fatal()
 	}
-
 	natsListener, err := stan.New(config, service) // STAN
 	if err != nil {
-		log.Fatal()
+		log.Fatal("cant connect nats ", err)
 	}
 	defer logFnError(natsListener.Close)
-
 	server, err := api.New(config.HttpServer.Port, service) // api server
 	if err != nil {
 		log.Fatal()
