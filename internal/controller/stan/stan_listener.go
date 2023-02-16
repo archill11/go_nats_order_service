@@ -2,6 +2,7 @@ package stan
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"myapp/internal/config"
 	"myapp/internal/model"
@@ -19,7 +20,7 @@ type StanListener struct {
 
 func New(conf config.Config, service *service.OrderService) (StanListener, error) {
 	stanConf := conf.StanListener
-	stanConn, err := stan.Connect(stanConf.ClusterName, stanConf.ClientId)
+	stanConn, err := stan.Connect(stanConf.ClusterName, stanConf.ClientId, stan.NatsURL(fmt.Sprintf("nats://%s:%s", stanConf.Host, stanConf.Port)))
 	if err != nil {
 		return StanListener{}, err
 	}

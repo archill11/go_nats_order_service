@@ -11,7 +11,7 @@ import (
 type Config struct {
 	Database struct {
 		Host       string `yaml:"host"`
-		Port       string `yaml:"5432"`
+		Port       string `yaml:"port"`
 		Username   string `yaml:"user"`
 		Password   string `yaml:"pass"`
 		DBname     string `yaml:"dbname"`
@@ -23,6 +23,8 @@ type Config struct {
 		ClientId    string `yaml:"client_id"`
 		DurableName string `yaml:"durable_name"`
 		Subject     string `yaml:"subject"`
+		Host     string `yaml:"host"`
+		Port     string `yaml:"port"`
 	} `yaml:"stan-listener"`
 
 	HttpServer struct {
