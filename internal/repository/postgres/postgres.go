@@ -84,7 +84,7 @@ func (s *Database) GetAll() ([]entity.OrderEntity, error) {
 	defer rows.Close()
 	for rows.Next() {
 		var order entity.OrderEntity
-		if err := rows.Scan(order.GetUIDPtr(), order.GetJsonDataPtr()); err != nil {
+		if err := rows.Scan(&order.OrderUID, &order.JsonData); err != nil {
 			return nil, err
 		}
 		orders = append(orders, order)
@@ -106,11 +106,11 @@ func (s *Database) InsertWorker() {
 	q := `INSERT INTO orders (uid, json_order) VALUES ($1, $2)`
 
 	for newEntity := range s.storeCh { // достаем новую сущность из канала
-		_, err := s.db.Exec(q, newEntity.GetUID(), newEntity.GetJsonData())
+		_, err := s.db.Exec(q, newEntity.OrderUID, newEntity.JsonData)
 		if err != nil {
-			log.Printf("postgresDB: ERR: could not save the order %s: %s", newEntity.GetUID(), err)
+			log.Printf("postgresDB: ERR: could not save the order %s: %s", newEntity.OrderUID, err)
 		} else {
-			log.Printf("postgresDB: save %s order", newEntity.GetUID())
+			log.Printf("postgresDB: save %s order", newEntity.OrderUID)
 		}
 	}
 	// произойдет если закрыть канал

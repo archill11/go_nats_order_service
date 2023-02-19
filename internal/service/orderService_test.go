@@ -1,8 +1,12 @@
 package service
 
 import (
+	"log"
+	"myapp/internal/config"
 	"myapp/internal/entity"
 	"myapp/internal/model"
+	cache "myapp/internal/repository/in_memory_cache"
+	"myapp/internal/repository/postgres"
 	"testing"
 	"time"
 
@@ -68,5 +72,65 @@ func Test_parseOrderToJson(t *testing.T) {
 	if diff := cmp.Diff(modelFromEntity[0], modelOrder); diff != "" {
 		t.Error(diff)
 	}
-
 }
+
+func logFnError(fn func() error) {
+	if err := fn(); err != nil {
+		log.Println(err)
+	}
+}
+func getService() *OrderService {
+	config := config.Get()
+	pg, err := postgres.New(config) // БД
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer logFnError(pg.CloseDb)
+	cacheStore, err := cache.New(pg) // in-memory кэш
+	if err != nil {
+		log.Fatal(err)
+	}
+	service, err := New(cacheStore) // сервис общается с репозиторием
+	if err != nil {
+		log.Fatal()
+	}
+	// data, _ := service.repo.GetAll()
+	return service
+}
+
+func getServiceData() []entity.OrderEntity {
+	config := config.Get()
+	pg, err := postgres.New(config) // БД
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer logFnError(pg.CloseDb)
+	cacheStore, err := cache.New(pg) // in-memory кэш
+	if err != nil {
+		log.Fatal(err)
+	}
+	service, err := New(cacheStore) // сервис общается с репозиторием
+	if err != nil {
+		log.Fatal()
+	}
+	data, _ := service.repo.GetAll()
+	return data
+} 
+
+var service = getService()
+var data = getServiceData()
+
+
+func Benchmark_GetAllOrders(b *testing.B) {
+	b.RunParallel(func(p *testing.PB) {for p.Next() {
+		_ = service.parseOrderToJson(data...)
+	}})
+}
+
+func Benchmark_GetAllOrdersWithPool(b *testing.B) {
+	b.RunParallel(func(p *testing.PB) {for p.Next() {
+		_ = service.parseOrderToJsonWithPool(data...)
+	}})
+}
+
+// go test -bench=. -benchmem

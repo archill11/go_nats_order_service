@@ -62,7 +62,7 @@ func (s *Cache) FillCacheFromDB(cacheStore *Cache, dbStore repository.OrderRepo)
 			go func(uid, json string) {
 				defer func() { <-sem }()
 				cacheStore.PutInCache(uid, json)
-			}(o.GetUID(), o.GetJsonData())
+			}(o.OrderUID, o.JsonData)
 		}
 		if len(orders) > 0 {
 			log.Printf("in_memory_cache: add %d orders from the database", len(orders))
@@ -106,7 +106,7 @@ func (s *Cache) Get(orderUID string) (entity.OrderEntity, error) {
 		if !ok {
 			return entity.OrderEntity{}, repository.ErrNotFound
 		} else {
-			orderJsonb = ordEntity.GetJsonData()
+			orderJsonb = ordEntity.JsonData
 			s.PutInCache(orderUID, orderJsonb.(string))
 		}
 	}
@@ -128,7 +128,6 @@ func (s *Cache) GetAll() ([]entity.OrderEntity, error) {
 	orders := make([]entity.OrderEntity, 0, cacheLen)
 	s.repository.Range(func(uid, jsonb interface{}) bool {
 		orderEntity := entity.NewOrderEntity(uid.(string), jsonb.(string))
-
 		orders = append(orders, orderEntity)
 		return true
 	})

@@ -40,7 +40,7 @@ var (
 // InitFile Метод инициализирует значения конфигурации из файла config.yaml
 func Get() Config {
 	once.Do(func() {
-		file, err := os.Open("config.yaml")
+		file, err := os.Open("../../config.yaml")
 		if err != nil {
 			log.Println(err)
 		}
