@@ -1,25 +1,54 @@
-version: "3.8"
+version: "3.5"
 
 services:
-  postgresql:
-    container_name: postgresql
+  # my-app:
+  #   container_name: my-app
+  #   build: ./
+  #   ports:
+  #     - 8080:8080
+  #   restart: unless-stopped
+  #   depends_on:
+  #     - db
+  #     - stan
+  #   networks:
+  #     - mynet
+
+  db:
+    container_name: db
     image: postgres:12-alpine
     ports:
       - "5432:5432"
+    restart: unless-stopped
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: secret
       POSTGRES_DB: orders_l0
+    networks:
+      - mynet
+    # volumes:
+    #   - db:/var/lib/postgresql/data
 
   stan:
-    container_name: stanserver
+    container_name: stan
     image: nats-streaming:0.25.3
     ports:
       - "4222:4222"
       - "8222:8222"
+    restart: unless-stopped
+    networks:
+      - mynet
     command:
       - "-cid=cluster-L0" 
       - "--debug=true"
       # - "--store=file"
       # - "--dir=data" #datastore
+
+networks:
+  mynet:
+    driver: bridge
+
+# volumes:
+#   db:
+#     driver: local
+
 
