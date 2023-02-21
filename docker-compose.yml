@@ -1,17 +1,33 @@
 version: "3.5"
 
 services:
-  # my-app:
-  #   container_name: my-app
-  #   build: ./
-  #   ports:
-  #     - 8080:8080
-  #   restart: unless-stopped
-  #   depends_on:
-  #     - db
-  #     - stan
-  #   networks:
-  #     - mynet
+  nginx:
+    container_name: nginx-rev-proxy
+    image: nginx:1.23
+    ports:
+    - "8080:80"
+    restart: unless-stopped
+    environment:
+    - NGINX_HOST=foobar.com
+    - NGINX_PORT=80
+    networks:
+      - mynet
+      - mynet-rev-proxy
+    volumes:
+    - ./volumes/nginx:/etc/nginx/conf.d  
+
+  my-app:
+    container_name: my-app
+    build: ./
+    ports:
+      - 8081:8081
+    restart: unless-stopped
+    depends_on:
+      - db
+      - stan
+    networks:
+      - mynet
+      - mynet-rev-proxy
 
   db:
     container_name: db
@@ -25,8 +41,8 @@ services:
       POSTGRES_DB: orders_l0
     networks:
       - mynet
-    # volumes:
-      # - ./volumes/db/data:/var/lib/postgresql/data
+    volumes:
+      - ./volumes/db/data:/var/lib/postgresql/data
       # - db:/var/lib/postgresql/data
 
   pgadmin:
@@ -58,6 +74,8 @@ services:
 
 networks:
   mynet:
+    driver: bridge
+  mynet-rev-proxy:
     driver: bridge
 
 # volumes:

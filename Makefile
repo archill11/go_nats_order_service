@@ -2,6 +2,14 @@ up:
 	docker-compose up
 .PHONY:up
 
+up-d:
+	docker-compose up -d
+.PHONY:up
+
+up-l:
+	docker-compose logs -f
+.PHONY:up
+
 stop:
 	docker-compose stop
 .PHONY:stop
