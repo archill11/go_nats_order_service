@@ -16,6 +16,7 @@ import (
 )
 
 func main() {
+	log.SetFlags(log.Lshortfile)
 	config := config.Get()
 
 	pg, err := postgres.New(config) // БД
